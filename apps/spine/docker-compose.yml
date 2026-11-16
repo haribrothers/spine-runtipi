@@ -1,0 +1,81 @@
+# Spine for Runtipi, from Spine's own Compose file for Docker panels
+# (docker/panels/docker-compose.yml in github.com/haribrothers/spine).
+# The proxy (spine-proxy) is the main service: Runtipi publishes its port and
+# routes the local subdomain or your domain to it; it sends /api to the API
+# and everything else to the web app, which it reaches as `api` and `web` on
+# this app's own network.
+services:
+  spine:
+    image: ghcr.io/haribrothers/spine-proxy:1.0.0-beta.4
+    depends_on:
+      - api
+      - web
+    environment:
+      SITE_ADDRESS: ":7746"
+      # Runtipi's Traefik is in front: believe it about visitors' addresses.
+      TRUSTED_PROXIES: private_ranges
+    volumes:
+      - ${APP_DATA_DIR}/data/caddy-data:/data
+      - ${APP_DATA_DIR}/data/caddy-config:/config
+    x-runtipi:
+      is_main: true
+      internal_port: 7746
+
+  api:
+    image: ghcr.io/haribrothers/spine-api:1.0.0-beta.4
+    depends_on:
+      spine-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://spine:${SPINE_DB_PASSWORD}@spine-db:5432/spine
+      AUTH_SECRET: ${SPINE_AUTH_SECRET}
+      APP_URL: ${SPINE_APP_URL}
+      API_URL: ${SPINE_APP_URL}/api
+      SMTP_HOST: ${SPINE_SMTP_HOST:-}
+      SMTP_PORT: ${SPINE_SMTP_PORT:-587}
+      SMTP_USER: ${SPINE_SMTP_USER:-}
+      SMTP_PASSWORD: ${SPINE_SMTP_PASSWORD:-}
+      SMTP_FROM: ${SPINE_SMTP_FROM:-}
+      BACKUP_PASSPHRASE: ${SPINE_BACKUP_PASSPHRASE:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: mailto:admin@localhost
+      TZ: ${TZ:-UTC}
+    volumes:
+      # Attachments, photos, logos and issued PDFs, and the database snapshot
+      # taken before each upgrade's migrations. Back these up with the database.
+      - ${APP_DATA_DIR}/data/files:/data/files
+      - ${APP_DATA_DIR}/data/snapshots:/data/snapshots
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/health/ready').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+
+  web:
+    image: ghcr.io/haribrothers/spine-web:1.0.0-beta.4
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      APP_URL: ${SPINE_APP_URL}
+      # The web server calls the API inside this app's network; browsers use <address>/api.
+      API_URL: http://api:4000
+
+  spine-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spine
+      POSTGRES_PASSWORD: ${SPINE_DB_PASSWORD}
+      POSTGRES_DB: spine
+    volumes:
+      - ${APP_DATA_DIR}/data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+x-runtipi:
+  schema_version: 2

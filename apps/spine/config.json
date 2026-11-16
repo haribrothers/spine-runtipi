@@ -1,0 +1,94 @@
+{
+  "$schema": "https://schemas.runtipi.io/v2/app-info.json",
+  "name": "Spine",
+  "id": "spine",
+  "available": true,
+  "short_desc": "Quotes, jobs, invoices and the books for a small service business",
+  "author": "haribrothers",
+  "port": 7746,
+  "categories": [
+    "finance",
+    "utilities"
+  ],
+  "description": "Spine runs a small service or project business from enquiry to quote, job, invoice, payment and the books. The double-entry accounting is derived from what you do, so the books keep themselves.",
+  "tipi_version": 1,
+  "version": "1.0.0-beta.4",
+  "source": "https://github.com/haribrothers/spine",
+  "website": "https://spine.h4loom.com",
+  "exposable": true,
+  "force_expose": false,
+  "dynamic_config": true,
+  "generate_vapid_keys": true,
+  "supported_architectures": [
+    "arm64",
+    "amd64"
+  ],
+  "min_tipi_version": "4.5.0",
+  "form_fields": [
+    {
+      "type": "url",
+      "label": "Address for links",
+      "hint": "Spine writes it into emails, PDFs and invitations, and signs in there. Use the address you open Spine at, e.g. https://spine.hari.box (its local subdomain) or http://192.168.1.20:7746, with no slash at the end.",
+      "placeholder": "https://spine.hari.box",
+      "required": true,
+      "env_variable": "SPINE_APP_URL"
+    },
+    {
+      "type": "random",
+      "label": "Auth secret",
+      "min": 64,
+      "encoding": "hex",
+      "env_variable": "SPINE_AUTH_SECRET"
+    },
+    {
+      "type": "random",
+      "label": "Database password",
+      "min": 32,
+      "encoding": "hex",
+      "env_variable": "SPINE_DB_PASSWORD"
+    },
+    {
+      "type": "text",
+      "label": "Email server (SMTP host)",
+      "hint": "To send quotes, invoices and invitations. Without it, documents still issue and email waits to be sent.",
+      "placeholder": "smtp.example.com",
+      "required": false,
+      "env_variable": "SPINE_SMTP_HOST"
+    },
+    {
+      "type": "number",
+      "label": "SMTP port",
+      "default": 587,
+      "required": false,
+      "env_variable": "SPINE_SMTP_PORT"
+    },
+    {
+      "type": "text",
+      "label": "SMTP user",
+      "required": false,
+      "env_variable": "SPINE_SMTP_USER"
+    },
+    {
+      "type": "password",
+      "label": "SMTP password",
+      "required": false,
+      "env_variable": "SPINE_SMTP_PASSWORD"
+    },
+    {
+      "type": "text",
+      "label": "Send email from",
+      "placeholder": "Your Business <billing@example.com>",
+      "required": false,
+      "env_variable": "SPINE_SMTP_FROM"
+    },
+    {
+      "type": "password",
+      "label": "Backup passphrase",
+      "hint": "Encrypts backups. Keep it somewhere other than this machine: without it an encrypted backup can't be restored.",
+      "required": false,
+      "env_variable": "SPINE_BACKUP_PASSPHRASE"
+    }
+  ],
+  "created_at": 1794835200000,
+  "updated_at": 1794835200000
+}

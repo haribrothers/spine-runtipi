@@ -60,9 +60,6 @@ If Spine already runs on this machine from `install.sh`, move its data with a ba
    docker run --rm -i --network $network --env-file /tmp/spine-restore.env --volumes-from $api \
      $image node apps/api/dist/scripts/restore.js --archive - --replace --new-secret < /path/to/spine-backup-<date>.tar.gz
    rm /tmp/spine-restore.env
-   # Spine 1.0.0-beta.4 only: clear the sign-in keys the old secret encrypted (later versions do this themselves).
-   db=$(docker ps -q --filter label=com.docker.compose.project=$project --filter label=com.docker.compose.service=spine-db)
-   docker exec $db psql -U spine -d spine -c 'delete from jwks'
    docker start $api $web
    ```
 

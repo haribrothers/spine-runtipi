@@ -6,7 +6,7 @@
 # this app's own network.
 services:
   spine:
-    image: ghcr.io/haribrothers/spine-proxy:1.0.0-beta.5
+    image: ghcr.io/haribrothers/spine-proxy:1.0.0-beta.6
     depends_on:
       - api
       - web
@@ -22,7 +22,7 @@ services:
       internal_port: 7746
 
   api:
-    image: ghcr.io/haribrothers/spine-api:1.0.0-beta.5
+    image: ghcr.io/haribrothers/spine-api:1.0.0-beta.6
     depends_on:
       spine-db:
         condition: service_healthy
@@ -54,7 +54,7 @@ services:
       start_period: 60s
 
   web:
-    image: ghcr.io/haribrothers/spine-web:1.0.0-beta.5
+    image: ghcr.io/haribrothers/spine-web:1.0.0-beta.6
     depends_on:
       api:
         condition: service_healthy
